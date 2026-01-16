@@ -1,0 +1,113 @@
+// This is a sample Prisma schema for the San Perfume Backend
+
+// Import the Prisma Client to use in your application
+// model represents tables in the database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Setting the database provider and URL
+ datasource db {
+   provider = "postgresql"
+   url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String   @db.VarChar(255)
+  orders    Order[]  @relation("UserOrders")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Product model
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  description String   @db.Text
+  price       Float
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id])
+  inStock     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Order model
+model Order {
+  id           Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation("UserOrders", fields: [userId], references: [id])
+  products     Product[] @relation("OrderProducts")
+  orderDate    DateTime @default(now())
+  status       String   @db.VarChar(50)
+}
+
+// Category model
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  products    Product[]
+}
+
+// Collection model
+model Collection {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  products    Product[]
+}
+
+// Coupon model
+model Coupon {
+  id            Int      @id @default(autoincrement())
+  code          String   @unique
+  discount      Float
+  validFrom     DateTime
+  validUntil    DateTime
+  isUsed        Boolean  @default(false)
+}
+
+// Page model
+model Page {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// BlogPost model
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  content     String   @db.Text
+  authorId    Int
+  author      User      @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Address model
+model Address {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  street      String   @db.VarChar(255)
+  city        String   @db.VarChar(100)
+  state       String   @db.VarChar(100)
+  zipCode     String   @db.VarChar(20)
+  country      String   @db.VarChar(100)
+}
+
+// WishlistItem model
+model WishlistItem {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
+}
